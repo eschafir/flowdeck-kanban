@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   addCard,
+  addColumn,
   deleteCard,
+  deleteColumn,
   findCardLocation,
   moveCard,
+  moveColumn,
   renameColumn,
   updateCard,
 } from "./boardActions";
@@ -51,6 +54,61 @@ describe("renameColumn", () => {
     expect(next.columns[0].name).toBe("Ideas");
     expect(next.columns[1].name).toBe("To Do");
     expect(next.id).toBe("board-a");
+  });
+});
+
+describe("addColumn", () => {
+  it("appends an empty column", () => {
+    const next = addColumn(sampleBoard, "Waiting");
+    expect(next.columns).toHaveLength(6);
+    expect(next.columns[5].name).toBe("Waiting");
+    expect(next.columns[5].cards).toEqual([]);
+    expect(next.columns[5].id).toMatch(/^col-/);
+  });
+
+  it("uses a default name when blank", () => {
+    const next = addColumn(sampleBoard, "   ");
+    expect(next.columns[5].name).toBe("New column");
+  });
+});
+
+describe("deleteColumn", () => {
+  it("removes the target column", () => {
+    const next = deleteColumn(sampleBoard, "col-b");
+    expect(next.columns.map((c) => c.id)).toEqual([
+      "col-a",
+      "col-c",
+      "col-d",
+      "col-e",
+    ]);
+  });
+
+  it("keeps the last column", () => {
+    let board = sampleBoard;
+    for (const id of ["col-a", "col-b", "col-c", "col-d"]) {
+      board = deleteColumn(board, id);
+    }
+    expect(board.columns).toHaveLength(1);
+    const blocked = deleteColumn(board, "col-e");
+    expect(blocked).toBe(board);
+  });
+});
+
+describe("moveColumn", () => {
+  it("reorders columns", () => {
+    const next = moveColumn(sampleBoard, "col-a", 2);
+    expect(next.columns.map((c) => c.id)).toEqual([
+      "col-b",
+      "col-c",
+      "col-a",
+      "col-d",
+      "col-e",
+    ]);
+  });
+
+  it("returns the same board when index is unchanged", () => {
+    const next = moveColumn(sampleBoard, "col-b", 1);
+    expect(next).toBe(sampleBoard);
   });
 });
 

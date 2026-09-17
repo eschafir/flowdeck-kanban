@@ -34,7 +34,7 @@ export function isValidBoard(value: unknown): value is Board {
     typeof board.name === "string" &&
     typeof board.description === "string" &&
     Array.isArray(board.columns) &&
-    board.columns.length === 5 &&
+    board.columns.length >= 1 &&
     board.columns.every(isColumn)
   );
 }
@@ -55,7 +55,7 @@ export function migrateLegacyBoard(value: unknown): Workspace | null {
   const legacy = value as Record<string, unknown>;
   if (
     !Array.isArray(legacy.columns) ||
-    legacy.columns.length !== 5 ||
+    legacy.columns.length < 1 ||
     !legacy.columns.every(isColumn)
   ) {
     return null;

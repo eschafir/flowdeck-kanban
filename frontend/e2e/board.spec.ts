@@ -22,36 +22,96 @@ test.describe("Flowdeck board", () => {
     await expect(page.getByText("Seed demo board")).toBeVisible();
   });
 
-  test("shows all five columns in the viewport without horizontal scroll", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 1024, height: 768 });
-    await page.goto("/");
-    await page.evaluate(() => window.localStorage.clear());
-    await page.reload();
-
-    const board = page.getByTestId("board");
-    await expect(board).toBeVisible();
-
+  test("adds and deletes a column", async ({ page }) => {
     const columns = page.locator('[data-testid^="column-col-"]');
     await expect(columns).toHaveCount(5);
 
-    const allInViewport = await columns.evaluateAll((els) =>
-      els.every((el) => {
-        const rect = el.getBoundingClientRect();
-        return (
-          rect.left >= 0 &&
-          rect.right <= window.innerWidth &&
-          rect.width > 0
-        );
-      })
-    );
-    expect(allInViewport).toBe(true);
+    await page.getByTestId("add-column").click();
+    await expect(columns).toHaveCount(6);
+    await expect(page.getByRole("heading", { name: "New column" })).toBeVisible();
 
-    const hasHorizontalOverflow = await board.evaluate((el) => {
-      return el.scrollWidth > el.clientWidth;
+    await page.locator('[data-testid^="delete-column-col-"]').last().click();
+    await expect(columns).toHaveCount(5);
+    await expect(page.getByRole("heading", { name: "New column" })).toHaveCount(0);
+
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByTestId("delete-column-col-done").click();
+    await expect(columns).toHaveCount(4);
+    await expect(page.getByText("Seed demo board")).toHaveCount(0);
+  });
+
+  test("drags a column to another position", async ({ page }) => {
+    await expect(page.getByTestId("add-column")).toBeVisible();
+
+    const board = page.getByTestId("board");
+    const handle = page.getByTestId("drag-column-col-done");
+    const review = page.getByTestId("column-col-review");
+
+    await handle.scrollIntoViewIfNeeded();
+    await review.scrollIntoViewIfNeeded();
+
+    const before = await board.locator('[data-testid^="column-col-"]').evaluateAll(
+      (els) => els.map((el) => el.getAttribute("data-testid"))
+    );
+    expect(before.at(-1)).toBe("column-col-done");
+
+    const moved = await page.evaluate(async () => {
+      const source = document.querySelector(
+        '[data-testid="drag-column-col-done"]'
+      );
+      const target = document.querySelector(
+        '[data-testid="drag-column-col-review"]'
+      );
+      if (!source || !target) return false;
+
+      const from = source.getBoundingClientRect();
+      const to = target.getBoundingClientRect();
+      const sx = from.x + from.width / 2;
+      const sy = from.y + from.height / 2;
+      const tx = to.x + to.width / 2;
+      const ty = to.y + to.height / 2;
+
+      const fire = (
+        el: Element | Document,
+        type: string,
+        x: number,
+        y: number,
+        buttons: number
+      ) => {
+        el.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            composed: true,
+            clientX: x,
+            clientY: y,
+            pointerId: 1,
+            pointerType: "mouse",
+            isPrimary: true,
+            buttons,
+            button: buttons ? 0 : -1,
+          })
+        );
+      };
+
+      fire(source, "pointerdown", sx, sy, 1);
+      await new Promise((r) => setTimeout(r, 40));
+      for (let i = 1; i <= 30; i++) {
+        const x = sx + ((tx - sx) * i) / 30;
+        const y = sy + ((ty - sy) * i) / 30;
+        fire(document, "pointermove", x, y, 1);
+        await new Promise((r) => setTimeout(r, 8));
+      }
+      fire(document, "pointerup", tx, ty, 0);
+      await new Promise((r) => setTimeout(r, 120));
+
+      const ids = [
+        ...document.querySelectorAll('[data-testid^="column-col-"]'),
+      ].map((el) => el.getAttribute("data-testid"));
+      return ids.indexOf("column-col-done") !== ids.length - 1;
     });
-    expect(hasHorizontalOverflow).toBe(false);
+
+    expect(moved).toBe(true);
   });
 
   test("renames a column", async ({ page }) => {

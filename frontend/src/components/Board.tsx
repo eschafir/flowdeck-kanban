@@ -9,12 +9,15 @@ import {
   closestCorners,
   useSensor,
   useSensors,
+  type CollisionDetection,
   type DragEndEvent,
   type DragOverEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
 import {
+  SortableContext,
   arrayMove,
+  horizontalListSortingStrategy,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { Column } from "./Column";
@@ -26,8 +29,11 @@ import { ThemeToggle } from "./ThemeToggle";
 import { initialWorkspace } from "@/lib/dummyData";
 import {
   addCard,
+  addColumn,
   deleteCard,
+  deleteColumn,
   findCardLocation,
+  moveColumn,
   renameColumn,
   updateCard,
 } from "@/lib/boardActions";
@@ -51,6 +57,7 @@ import {
 import type {
   Board as BoardType,
   Card as CardType,
+  Column as ColumnType,
   Workspace,
 } from "@/lib/types";
 
@@ -117,12 +124,26 @@ function moveCardBetween(
   return { ...board, columns };
 }
 
+const columnCollision: CollisionDetection = (args) => {
+  const activeId = String(args.active.id);
+  if (!activeId.startsWith("column:")) {
+    return closestCorners(args);
+  }
+
+  const containers = args.droppableContainers.filter((container) =>
+    String(container.id).startsWith("column:")
+  );
+
+  return closestCorners({ ...args, droppableContainers: containers });
+};
+
 export function Board() {
   const [workspace, setWorkspace] = useState<Workspace>(initialWorkspace);
   const board = getActiveBoard(workspace);
   const boardRef = useRef(board);
   boardRef.current = board;
   const [activeCard, setActiveCard] = useState<CardType | null>(null);
+  const [activeColumn, setActiveColumn] = useState<ColumnType | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [creatingBoard, setCreatingBoard] = useState(false);
   const [editingBoard, setEditingBoard] = useState(false);
@@ -170,6 +191,19 @@ export function Board() {
 
   function handleRename(columnId: string, name: string) {
     patchActiveBoard((current) => renameColumn(current, columnId, name));
+  }
+
+  function handleAddColumn() {
+    patchActiveBoard((current) => addColumn(current));
+  }
+
+  function handleDeleteColumn(columnId: string) {
+    const column = board.columns.find((item) => item.id === columnId);
+    if (column) {
+      const openInColumn = column.cards.some((card) => card.id === selectedCardId);
+      if (openInColumn) setSelectedCardId(null);
+    }
+    patchActiveBoard((current) => deleteColumn(current, columnId));
   }
 
   function handleAddCard(columnId: string, title: string, details: string) {
@@ -268,16 +302,32 @@ export function Board() {
     void file.text().then(applyImportedRaw);
   }
 
+  function parseColumnSortableId(id: string): string | null {
+    return id.startsWith("column:") ? id.slice("column:".length) : null;
+  }
+
+  function resolveColumnId(overId: string): string | null {
+    return parseColumnSortableId(overId);
+  }
+
   function handleDragStart(event: DragStartEvent) {
-    const location = findCardLocation(
-      boardRef.current,
-      String(event.active.id)
-    );
+    const activeId = String(event.active.id);
+    const columnId = parseColumnSortableId(activeId);
+    if (columnId) {
+      setActiveColumn(
+        boardRef.current.columns.find((c) => c.id === columnId) ?? null
+      );
+      setActiveCard(null);
+      return;
+    }
+
+    const location = findCardLocation(boardRef.current, activeId);
     if (!location) return;
-    const column = boardRef.current.columns.find(
+    const host = boardRef.current.columns.find(
       (c) => c.id === location.columnId
     );
-    setActiveCard(column?.cards[location.index] ?? null);
+    setActiveCard(host?.cards[location.index] ?? null);
+    setActiveColumn(null);
   }
 
   function handleDragOver(event: DragOverEvent) {
@@ -287,6 +337,35 @@ export function Board() {
     const activeId = String(active.id);
     const overId = String(over.id);
     if (activeId === overId) return;
+
+    const activeColumnId = parseColumnSortableId(activeId);
+    if (activeColumnId) {
+      const overColumnId = resolveColumnId(overId);
+      if (!overColumnId || overColumnId === activeColumnId) return;
+
+      const fromIndex = boardRef.current.columns.findIndex(
+        (c) => c.id === activeColumnId
+      );
+      const toIndex = boardRef.current.columns.findIndex(
+        (c) => c.id === overColumnId
+      );
+      if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
+
+      // Only commit when the pointer has crossed the over column's midpoint.
+      // Without this, adjacent columns flip-flop on every dragOver frame.
+      const activeRect = active.rect.current.translated;
+      const overRect = over.rect;
+      if (activeRect && overRect) {
+        const overMidX = overRect.left + overRect.width / 2;
+        if (fromIndex < toIndex && activeRect.right < overMidX) return;
+        if (fromIndex > toIndex && activeRect.left > overMidX) return;
+      }
+
+      patchActiveBoard((current) =>
+        moveColumn(current, activeColumnId, toIndex)
+      );
+      return;
+    }
 
     const activeLocation = findCardLocation(boardRef.current, activeId);
     if (!activeLocation) return;
@@ -304,10 +383,33 @@ export function Board() {
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
+    const activeId = String(active.id);
+    const activeColumnId = parseColumnSortableId(activeId);
+
+    if (activeColumnId) {
+      setActiveColumn(null);
+      if (!over) return;
+
+      const overColumnId = resolveColumnId(String(over.id));
+      if (!overColumnId || overColumnId === activeColumnId) return;
+
+      const fromIndex = boardRef.current.columns.findIndex(
+        (c) => c.id === activeColumnId
+      );
+      const toIndex = boardRef.current.columns.findIndex(
+        (c) => c.id === overColumnId
+      );
+      if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
+
+      patchActiveBoard((current) =>
+        moveColumn(current, activeColumnId, toIndex)
+      );
+      return;
+    }
+
     setActiveCard(null);
     if (!over) return;
 
-    const activeId = String(active.id);
     const overId = String(over.id);
     if (activeId === overId) return;
 
@@ -320,16 +422,40 @@ export function Board() {
         null
       : null;
 
-  const columns = board.columns.map((column) => (
+  const columnNodes = board.columns.map((column) => (
     <Column
       key={column.id}
       column={column}
+      canDelete={board.columns.length > 1}
       onRename={handleRename}
+      onDelete={handleDeleteColumn}
       onAddCard={handleAddCard}
       onDeleteCard={handleDeleteCard}
       onOpenCard={handleOpenCard}
     />
   ));
+
+  const boardColumns = (
+    <div
+      data-testid="board"
+      className="flex flex-1 gap-4 overflow-x-auto px-6 pb-10 pt-6 sm:px-10"
+    >
+      <SortableContext
+        items={board.columns.map((column) => `column:${column.id}`)}
+        strategy={horizontalListSortingStrategy}
+      >
+        {columnNodes}
+      </SortableContext>
+      <button
+        type="button"
+        onClick={handleAddColumn}
+        data-testid="add-column"
+        className="flex min-w-[15rem] flex-1 shrink-0 items-center justify-center rounded-2xl border border-dashed border-[var(--blue-primary)]/40 bg-[var(--column-bg)] px-4 py-6 text-sm font-medium text-[var(--blue-primary)] transition-colors hover:border-[var(--blue-primary)] hover:bg-[var(--panel-muted)]"
+      >
+        + Add column
+      </button>
+    </div>
+  );
 
   return (
     <div className="flex min-h-full flex-col">
@@ -415,19 +541,24 @@ export function Board() {
       {ready ? (
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCorners}
+          collisionDetection={columnCollision}
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div
-            data-testid="board"
-            className="flex flex-1 gap-4 overflow-x-hidden px-6 pb-10 pt-6 sm:px-10"
-          >
-            {columns}
-          </div>
+          {boardColumns}
           <DragOverlay>
-            {activeCard ? (
+            {activeColumn ? (
+              <div className="min-w-[15rem] flex-1 rounded-2xl border border-[var(--blue-primary)] bg-[var(--column-bg)] p-4 shadow-xl">
+                <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--dark-navy)]">
+                  {activeColumn.name}
+                </h3>
+                <p className="mt-2 text-xs uppercase tracking-wider text-[var(--gray-text)]">
+                  {activeColumn.cards.length}{" "}
+                  {activeColumn.cards.length === 1 ? "card" : "cards"}
+                </p>
+              </div>
+            ) : activeCard ? (
               <div className="w-[min(18rem,100%)] rounded-xl border border-[var(--blue-primary)] bg-[var(--surface-strong)] p-3.5 shadow-xl">
                 <h3 className="font-[family-name:var(--font-display)] text-[0.95rem] font-semibold text-[var(--dark-navy)]">
                   {activeCard.title}
@@ -442,9 +573,9 @@ export function Board() {
       ) : (
         <div
           data-testid="board"
-          className="flex flex-1 gap-4 overflow-x-hidden px-6 pb-10 pt-6 sm:px-10"
+          className="flex flex-1 gap-4 overflow-x-auto px-6 pb-10 pt-6 sm:px-10"
         >
-          {columns}
+          {columnNodes}
         </div>
       )}
 

@@ -1,4 +1,4 @@
-import type { Board, Card } from "./types";
+import type { Board, Card, Column } from "./types";
 
 function nextId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -15,6 +15,44 @@ export function renameColumn(
       column.id === columnId ? { ...column, name } : column
     ),
   };
+}
+
+export function addColumn(board: Board, name = "New column"): Board {
+  const column: Column = {
+    id: nextId("col"),
+    name: name.trim() || "New column",
+    cards: [],
+  };
+  return {
+    ...board,
+    columns: [...board.columns, column],
+  };
+}
+
+export function deleteColumn(board: Board, columnId: string): Board {
+  if (board.columns.length <= 1) return board;
+  if (!board.columns.some((column) => column.id === columnId)) return board;
+  return {
+    ...board,
+    columns: board.columns.filter((column) => column.id !== columnId),
+  };
+}
+
+export function moveColumn(
+  board: Board,
+  columnId: string,
+  toIndex: number
+): Board {
+  const fromIndex = board.columns.findIndex((column) => column.id === columnId);
+  if (fromIndex === -1) return board;
+
+  const clamped = Math.max(0, Math.min(toIndex, board.columns.length - 1));
+  if (fromIndex === clamped) return board;
+
+  const columns = [...board.columns];
+  const [column] = columns.splice(fromIndex, 1);
+  columns.splice(clamped, 0, column);
+  return { ...board, columns };
 }
 
 export function addCard(

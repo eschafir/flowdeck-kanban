@@ -57,6 +57,7 @@ export function remintBoardIds(board: Board): Board {
     id: nextId("board"),
     columns: board.columns.map((column) => ({
       ...column,
+      id: nextId("col"),
       cards: column.cards.map((card) => ({
         ...card,
         id: nextId("card"),

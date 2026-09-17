@@ -19,7 +19,7 @@ export function Card({ card, onOpen, onDelete }: CardProps) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: card.id });
+  } = useSortable({ id: card.id, data: { type: "card" } });
 
   const style = {
     transform: CSS.Transform.toString(transform),

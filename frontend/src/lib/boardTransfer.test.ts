@@ -26,9 +26,10 @@ describe("boardTransfer", () => {
     expect(parseBoardExport(JSON.stringify({ format: "other" }))).toBeNull();
   });
 
-  it("remints board and card ids", () => {
+  it("remints board, column, and card ids", () => {
     const reminted = remintBoardIds(initialBoard);
     expect(reminted.id).not.toBe(initialBoard.id);
+    expect(reminted.columns[0].id).not.toBe(initialBoard.columns[0].id);
     expect(reminted.columns[0].cards[0].id).not.toBe(
       initialBoard.columns[0].cards[0].id
     );

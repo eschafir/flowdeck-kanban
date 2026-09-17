@@ -3,6 +3,9 @@
 <img src="frontend/public/icon.png" alt="Flowdeck icon" width="96" />
 
 Multi-board Kanban for Mac (Electron) and the browser.
+<!-- **Flowdeck v1.0.0** is a multi-board Kanban app for Mac and the browser. Keep work moving across fixed columns with drag-and-drop cards, rich-text details, light and dark themes, and local persistence—no accounts, no clutter.
+
+Each board has five renameable columns. Create boards, switch between them, edit board details, and export or import boards as `.flowdeck.json` files. On Mac, data lives in Application Support; in the browser it uses localStorage. -->
 
 ## Mac app (Electron)
 
