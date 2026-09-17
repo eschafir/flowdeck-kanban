@@ -1,5 +1,7 @@
 # Flowdeck
 
+<img src="frontend/public/icon.png" alt="Flowdeck icon" width="96" />
+
 Multi-board Kanban for Mac (Electron) and the browser.
 
 ## Mac app (Electron)
