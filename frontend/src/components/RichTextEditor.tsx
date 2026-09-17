@@ -60,7 +60,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   if (!editor) return null;
 
   return (
-    <div className="overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-white">
+    <div className="overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--panel)]">
       <div
         className="flex flex-wrap gap-1 border-b border-[var(--border-subtle)] bg-[var(--column-bg)] px-2 py-1.5"
         data-testid="card-editor-toolbar"

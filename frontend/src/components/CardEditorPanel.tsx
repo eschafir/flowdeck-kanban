@@ -41,10 +41,11 @@ export function CardEditorPanel({ card, onSave, onClose }: CardEditorPanelProps)
         type="button"
         aria-label="Close editor"
         data-testid="card-editor-backdrop"
-        className="absolute inset-0 bg-[var(--dark-navy)]/35 backdrop-blur-[1px]"
+        className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-[1px]"
+
         onClick={onClose}
       />
-      <aside className="relative flex h-full w-full max-w-md flex-col border-l border-[var(--border-subtle)] bg-white shadow-2xl">
+      <aside className="relative flex h-full w-full max-w-md flex-col border-l border-[var(--border-subtle)] bg-[var(--panel)] shadow-2xl">
         <header className="border-b border-[var(--border-subtle)] px-5 py-4">
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--blue-primary)]">
             Edit card
@@ -65,7 +66,7 @@ export function CardEditorPanel({ card, onSave, onClose }: CardEditorPanelProps)
               onChange={(e) => setTitle(e.target.value)}
               aria-label="Card title"
               data-testid="card-editor-title"
-              className="rounded-md border border-[var(--border-subtle)] px-3 py-2 font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--dark-navy)] outline-none focus:border-[var(--blue-primary)]"
+              className="rounded-md border border-[var(--border-subtle)] bg-[var(--panel)] px-3 py-2 font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--dark-navy)] outline-none focus:border-[var(--blue-primary)]"
             />
           </label>
 

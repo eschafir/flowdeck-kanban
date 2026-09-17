@@ -32,42 +32,21 @@ export function Card({ card, onOpen, onDelete }: CardProps) {
     <article
       ref={setNodeRef}
       style={style}
-      data-testid={`card-${card.id}`}
-      className={`group relative rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-strong)] p-3.5 shadow-[var(--shadow-soft)] transition-shadow ${
+      data-testid={card.id}
+      className={`group relative cursor-grab rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-strong)] p-3.5 shadow-[var(--shadow-soft)] transition-shadow active:cursor-grabbing ${
         isDragging
           ? "z-20 opacity-50 shadow-xl ring-2 ring-[var(--blue-primary)]"
           : "hover:shadow-md"
       }`}
+      {...attributes}
+      {...listeners}
     >
       <div className="flex items-start gap-2">
         <button
           type="button"
-          className="mt-0.5 cursor-grab touch-none rounded px-1 text-[var(--gray-text)] hover:text-[var(--blue-primary)] active:cursor-grabbing"
-          aria-label={`Drag ${card.title}`}
-          data-testid={`drag-${card.id}`}
-          {...attributes}
-          {...listeners}
-        >
-          <svg
-            width="12"
-            height="16"
-            viewBox="0 0 12 16"
-            fill="currentColor"
-            aria-hidden
-          >
-            <circle cx="3" cy="3" r="1.5" />
-            <circle cx="9" cy="3" r="1.5" />
-            <circle cx="3" cy="8" r="1.5" />
-            <circle cx="9" cy="8" r="1.5" />
-            <circle cx="3" cy="13" r="1.5" />
-            <circle cx="9" cy="13" r="1.5" />
-          </svg>
-        </button>
-        <button
-          type="button"
           onClick={() => onOpen(card.id)}
           data-testid={`open-${card.id}`}
-          className="min-w-0 flex-1 cursor-pointer rounded-md text-left"
+          className="min-w-0 flex-1 rounded-md text-left"
         >
           <h3 className="font-[family-name:var(--font-display)] text-[0.95rem] font-semibold leading-snug text-[var(--dark-navy)]">
             {card.title}
@@ -87,7 +66,7 @@ export function Card({ card, onOpen, onDelete }: CardProps) {
           onPointerDown={(event) => event.stopPropagation()}
           aria-label={`Delete ${card.title}`}
           data-testid={`delete-${card.id}`}
-          className="rounded-md px-1.5 py-0.5 text-sm text-[var(--gray-text)] opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 focus:opacity-100"
+          className="rounded-md px-1.5 py-0.5 text-sm text-[var(--gray-text)] opacity-0 transition-opacity hover:bg-[var(--danger-soft)] hover:text-red-500 group-hover:opacity-100 focus:opacity-100"
         >
           x
         </button>

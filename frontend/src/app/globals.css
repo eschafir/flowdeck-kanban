@@ -11,6 +11,35 @@
   --column-bg: rgba(255, 255, 255, 0.55);
   --border-subtle: rgba(3, 33, 71, 0.08);
   --shadow-soft: 0 12px 40px rgba(3, 33, 71, 0.08);
+  --panel: #ffffff;
+  --panel-muted: rgba(255, 255, 255, 0.75);
+  --overlay: rgba(3, 33, 71, 0.35);
+  --danger-soft: #fef2f2;
+  --page-gradient:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(32, 157, 215, 0.18), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 90% 0%, rgba(236, 173, 10, 0.16), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(117, 57, 145, 0.1), transparent 55%),
+    linear-gradient(160deg, #f7fafc 0%, #eef4f8 45%, #f5f1ea 100%);
+}
+
+html.dark {
+  --dark-navy: #e8eef6;
+  --gray-text: #9aa6b5;
+  --surface: rgba(22, 32, 48, 0.88);
+  --surface-strong: #1a2436;
+  --column-bg: rgba(22, 32, 48, 0.72);
+  --border-subtle: rgba(232, 238, 246, 0.12);
+  --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.4);
+  --panel: #1a2436;
+  --panel-muted: rgba(26, 36, 54, 0.9);
+  --overlay: rgba(0, 0, 0, 0.55);
+  --danger-soft: rgba(127, 29, 29, 0.35);
+  --page-gradient:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(32, 157, 215, 0.16), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 90% 0%, rgba(236, 173, 10, 0.1), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(117, 57, 145, 0.14), transparent 55%),
+    linear-gradient(160deg, #0b1220 0%, #121c2c 45%, #162033 100%);
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -36,11 +65,7 @@ body {
   margin: 0;
   color: var(--dark-navy);
   font-family: var(--font-body), Georgia, serif;
-  background:
-    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(32, 157, 215, 0.18), transparent 55%),
-    radial-gradient(ellipse 70% 45% at 90% 0%, rgba(236, 173, 10, 0.16), transparent 50%),
-    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(117, 57, 145, 0.1), transparent 55%),
-    linear-gradient(160deg, #f7fafc 0%, #eef4f8 45%, #f5f1ea 100%);
+  background: var(--page-gradient);
   background-attachment: fixed;
 }
 

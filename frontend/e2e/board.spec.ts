@@ -22,6 +22,38 @@ test.describe("Flowdeck board", () => {
     await expect(page.getByText("Seed demo board")).toBeVisible();
   });
 
+  test("shows all five columns in the viewport without horizontal scroll", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await page.goto("/");
+    await page.evaluate(() => window.localStorage.clear());
+    await page.reload();
+
+    const board = page.getByTestId("board");
+    await expect(board).toBeVisible();
+
+    const columns = page.locator('[data-testid^="column-col-"]');
+    await expect(columns).toHaveCount(5);
+
+    const allInViewport = await columns.evaluateAll((els) =>
+      els.every((el) => {
+        const rect = el.getBoundingClientRect();
+        return (
+          rect.left >= 0 &&
+          rect.right <= window.innerWidth &&
+          rect.width > 0
+        );
+      })
+    );
+    expect(allInViewport).toBe(true);
+
+    const hasHorizontalOverflow = await board.evaluate((el) => {
+      return el.scrollWidth > el.clientWidth;
+    });
+    expect(hasHorizontalOverflow).toBe(false);
+  });
+
   test("renames a column", async ({ page }) => {
     await page.getByTestId("rename-col-backlog").click();
     const input = page.getByTestId("rename-input-col-backlog");
@@ -48,7 +80,7 @@ test.describe("Flowdeck board", () => {
   });
 
   test("drags a card to another column", async ({ page }) => {
-    const card = page.getByTestId("drag-card-7");
+    const card = page.getByTestId("card-7");
     const target = page.getByTestId("column-drop-col-review");
 
     await card.scrollIntoViewIfNeeded();
@@ -59,7 +91,7 @@ test.describe("Flowdeck board", () => {
     ).toBeVisible();
 
     const moved = await page.evaluate(async () => {
-      const source = document.querySelector('[data-testid="drag-card-7"]');
+      const source = document.querySelector('[data-testid="card-7"]');
       const drop = document.querySelector(
         '[data-testid="column-drop-col-review"]'
       );
@@ -277,6 +309,28 @@ test.describe("Flowdeck board", () => {
     ).toBeVisible();
     await expect(page.getByTestId("board-select").locator("option")).toHaveCount(
       1
+    );
+  });
+
+  test("toggles dark mode", async ({ page }) => {
+    const html = page.locator("html");
+    await expect(page.getByTestId("theme-toggle")).toBeVisible();
+
+    await page.evaluate(() => {
+      window.localStorage.setItem("flowdeck.theme", "light");
+      document.documentElement.classList.remove("dark");
+    });
+
+    await page.getByTestId("theme-toggle").click();
+    await expect(html).toHaveClass(/dark/);
+    expect(await page.evaluate(() => localStorage.getItem("flowdeck.theme"))).toBe(
+      "dark"
+    );
+
+    await page.getByTestId("theme-toggle").click();
+    await expect(html).not.toHaveClass(/dark/);
+    expect(await page.evaluate(() => localStorage.getItem("flowdeck.theme"))).toBe(
+      "light"
     );
   });
 });

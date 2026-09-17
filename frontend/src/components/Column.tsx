@@ -61,7 +61,7 @@ export function Column({
   return (
     <section
       data-testid={`column-${column.id}`}
-      className={`flex w-72 shrink-0 flex-col rounded-2xl border border-[var(--border-subtle)] bg-[var(--column-bg)] backdrop-blur-sm transition-shadow ${
+      className={`flex min-w-0 flex-1 flex-col rounded-2xl border border-[var(--border-subtle)] bg-[var(--column-bg)] backdrop-blur-sm transition-shadow ${
         isOver ? "ring-2 ring-[var(--accent-yellow)] shadow-lg" : "shadow-sm"
       }`}
     >
@@ -75,7 +75,7 @@ export function Column({
             onKeyDown={handleNameKeyDown}
             aria-label="Column name"
             data-testid={`rename-input-${column.id}`}
-            className="w-full rounded-md border border-[var(--blue-primary)] bg-white px-2 py-1 font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--dark-navy)] outline-none"
+            className="w-full rounded-md border border-[var(--blue-primary)] bg-[var(--panel)] px-2 py-1 font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--dark-navy)] outline-none"
           />
         ) : (
           <button
@@ -125,7 +125,7 @@ export function Column({
               placeholder="Card title"
               aria-label="Card title"
               data-testid={`add-title-${column.id}`}
-              className="rounded-md border border-[var(--border-subtle)] bg-white px-2.5 py-1.5 text-sm text-[var(--dark-navy)] outline-none focus:border-[var(--blue-primary)]"
+              className="rounded-md border border-[var(--border-subtle)] bg-[var(--panel)] px-2.5 py-1.5 text-sm text-[var(--dark-navy)] outline-none focus:border-[var(--blue-primary)]"
             />
             <textarea
               value={details}
@@ -134,7 +134,7 @@ export function Column({
               aria-label="Card details"
               rows={2}
               data-testid={`add-details-${column.id}`}
-              className="resize-none rounded-md border border-[var(--border-subtle)] bg-white px-2.5 py-1.5 text-sm text-[var(--dark-navy)] outline-none focus:border-[var(--blue-primary)]"
+              className="resize-none rounded-md border border-[var(--border-subtle)] bg-[var(--panel)] px-2.5 py-1.5 text-sm text-[var(--dark-navy)] outline-none focus:border-[var(--blue-primary)]"
             />
             <div className="flex gap-2">
               <button
@@ -162,7 +162,7 @@ export function Column({
             type="button"
             onClick={() => setAdding(true)}
             data-testid={`add-card-${column.id}`}
-            className="w-full rounded-md border border-dashed border-[var(--blue-primary)]/40 px-3 py-2 text-sm font-medium text-[var(--blue-primary)] transition-colors hover:border-[var(--blue-primary)] hover:bg-white/60"
+            className="w-full rounded-md border border-dashed border-[var(--blue-primary)]/40 px-3 py-2 text-sm font-medium text-[var(--blue-primary)] transition-colors hover:border-[var(--blue-primary)] hover:bg-[var(--panel-muted)]"
           >
             + Add card
           </button>

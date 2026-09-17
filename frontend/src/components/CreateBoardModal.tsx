@@ -23,12 +23,14 @@ export function CreateBoardModal({ onCreate, onClose }: CreateBoardModalProps) {
         type="button"
         aria-label="Close create board"
         data-testid="create-board-backdrop"
-        className="absolute inset-0 bg-[var(--dark-navy)]/35 backdrop-blur-[1px]"
+        className="absolute inset-0 bg-[var(--overlay)] backdrop-blur-[1px]"
+
         onClick={onClose}
       />
       <div
         data-testid="create-board-modal"
-        className="relative w-full max-w-md rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-2xl"
+        className="relative w-full max-w-md rounded-2xl border border-[var(--border-subtle)] bg-[var(--panel)] p-6 shadow-2xl"
+
       >
         <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--blue-primary)]">
           New board
@@ -50,7 +52,7 @@ export function CreateBoardModal({ onCreate, onClose }: CreateBoardModalProps) {
               aria-label="Board name"
               data-testid="create-board-name"
               placeholder="e.g. Marketing sprint"
-              className="rounded-md border border-[var(--border-subtle)] px-3 py-2 text-[var(--dark-navy)] outline-none focus:border-[var(--blue-primary)]"
+              className="rounded-md border border-[var(--border-subtle)] bg-[var(--panel)] px-3 py-2 text-[var(--dark-navy)] outline-none focus:border-[var(--blue-primary)]"
             />
           </label>
           <label className="flex flex-col gap-1.5">
@@ -64,7 +66,7 @@ export function CreateBoardModal({ onCreate, onClose }: CreateBoardModalProps) {
               data-testid="create-board-description"
               rows={3}
               placeholder="What is this board for?"
-              className="resize-none rounded-md border border-[var(--border-subtle)] px-3 py-2 text-sm text-[var(--dark-navy)] outline-none focus:border-[var(--blue-primary)]"
+              className="resize-none rounded-md border border-[var(--border-subtle)] bg-[var(--panel)] px-3 py-2 text-sm text-[var(--dark-navy)] outline-none focus:border-[var(--blue-primary)]"
             />
           </label>
           <div className="flex gap-2 pt-1">

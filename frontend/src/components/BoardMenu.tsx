@@ -72,7 +72,7 @@ export function BoardMenu({
         <div
           role="menu"
           data-testid="board-menu-panel"
-          className="absolute right-0 z-50 mt-2 min-w-[10rem] overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-white py-1 shadow-[var(--shadow-soft)]"
+          className="absolute right-0 z-50 mt-2 min-w-[10rem] overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--panel)] py-1 shadow-[var(--shadow-soft)]"
         >
           <button
             type="button"
@@ -120,7 +120,7 @@ export function BoardMenu({
               if (!canDelete) return;
               run(onDelete);
             }}
-            className="block w-full px-3 py-2 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:text-[var(--gray-text)] disabled:hover:bg-transparent"
+            className="block w-full px-3 py-2 text-left text-sm font-medium text-red-500 transition-colors hover:bg-[var(--danger-soft)] disabled:cursor-not-allowed disabled:text-[var(--gray-text)] disabled:hover:bg-transparent"
           >
             Delete board
           </button>

@@ -22,6 +22,7 @@ import { CardEditorPanel } from "./CardEditorPanel";
 import { CreateBoardModal } from "./CreateBoardModal";
 import { EditBoardModal } from "./EditBoardModal";
 import { BoardMenu } from "./BoardMenu";
+import { ThemeToggle } from "./ThemeToggle";
 import { initialWorkspace } from "@/lib/dummyData";
 import {
   addCard,
@@ -338,42 +339,45 @@ export function Board() {
             Flowdeck
           </p>
 
-          <div
-            className="flex items-center gap-0.5 rounded-xl border border-[var(--border-subtle)] bg-white/75 p-1 shadow-[var(--shadow-soft)] backdrop-blur-sm"
-            data-testid="board-controls"
-          >
-            <select
-              value={board.id}
-              onChange={(e) => handleSelectBoard(e.target.value)}
-              aria-label="Select board"
-              data-testid="board-select"
-              className="max-w-[11rem] cursor-pointer appearance-none rounded-lg bg-transparent py-1.5 pl-3 pr-7 text-sm font-medium text-[var(--dark-navy)] outline-none transition-colors hover:bg-[var(--blue-primary)]/8 focus:bg-[var(--blue-primary)]/8 sm:max-w-[14rem]"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888888' d='M3 4.5L6 8l3-3.5'/%3E%3C/svg%3E")`,
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "right 0.55rem center",
-              }}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <div
+              className="flex items-center gap-0.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--panel-muted)] p-1 shadow-[var(--shadow-soft)] backdrop-blur-sm"
+              data-testid="board-controls"
             >
-              {workspace.boards.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+              <select
+                value={board.id}
+                onChange={(e) => handleSelectBoard(e.target.value)}
+                aria-label="Select board"
+                data-testid="board-select"
+                className="max-w-[11rem] cursor-pointer appearance-none rounded-lg bg-transparent py-1.5 pl-3 pr-7 text-sm font-medium text-[var(--dark-navy)] outline-none transition-colors hover:bg-[var(--blue-primary)]/8 focus:bg-[var(--blue-primary)]/8 sm:max-w-[14rem]"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888888' d='M3 4.5L6 8l3-3.5'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 0.55rem center",
+                }}
+              >
+                {workspace.boards.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
 
-            <span
-              aria-hidden
-              className="mx-0.5 h-4 w-px bg-[var(--border-subtle)]"
-            />
+              <span
+                aria-hidden
+                className="mx-0.5 h-4 w-px bg-[var(--border-subtle)]"
+              />
 
-            <BoardMenu
-              onEdit={() => setEditingBoard(true)}
-              onExport={() => void handleExportBoard()}
-              onImport={() => void handleImportBoard()}
-              onNew={() => setCreatingBoard(true)}
-              onDelete={handleDeleteBoard}
-              canDelete={workspace.boards.length > 1}
-            />
+              <BoardMenu
+                onEdit={() => setEditingBoard(true)}
+                onExport={() => void handleExportBoard()}
+                onImport={() => void handleImportBoard()}
+                onNew={() => setCreatingBoard(true)}
+                onDelete={handleDeleteBoard}
+                canDelete={workspace.boards.length > 1}
+              />
+            </div>
           </div>
         </div>
 
@@ -418,13 +422,13 @@ export function Board() {
         >
           <div
             data-testid="board"
-            className="flex flex-1 gap-4 overflow-x-auto px-6 pb-10 pt-6 sm:px-10"
+            className="flex flex-1 gap-4 overflow-x-hidden px-6 pb-10 pt-6 sm:px-10"
           >
             {columns}
           </div>
           <DragOverlay>
             {activeCard ? (
-              <div className="w-72 rounded-xl border border-[var(--blue-primary)] bg-white p-3.5 shadow-xl">
+              <div className="w-[min(18rem,100%)] rounded-xl border border-[var(--blue-primary)] bg-[var(--surface-strong)] p-3.5 shadow-xl">
                 <h3 className="font-[family-name:var(--font-display)] text-[0.95rem] font-semibold text-[var(--dark-navy)]">
                   {activeCard.title}
                 </h3>
@@ -438,7 +442,7 @@ export function Board() {
       ) : (
         <div
           data-testid="board"
-          className="flex flex-1 gap-4 overflow-x-auto px-6 pb-10 pt-6 sm:px-10"
+          className="flex flex-1 gap-4 overflow-x-hidden px-6 pb-10 pt-6 sm:px-10"
         >
           {columns}
         </div>
