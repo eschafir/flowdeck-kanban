@@ -112,4 +112,21 @@ describe("storage", () => {
     expect(isValidWorkspace(initialWorkspace)).toBe(true);
     expect(isValidWorkspace({ boards: [], activeBoardId: "x" })).toBe(false);
   });
+
+  it("accepts cards with a valid deadline and rejects malformed ones", () => {
+    const withCard = (card: Record<string, unknown>) => ({
+      ...initialBoard,
+      columns: [{ id: "c", name: "C", cards: [card] }],
+    });
+    const base = { id: "a", title: "A", details: "" };
+
+    expect(isValidBoard(withCard(base))).toBe(true);
+    expect(isValidBoard(withCard({ ...base, deadline: "2026-10-01" }))).toBe(
+      true
+    );
+    expect(isValidBoard(withCard({ ...base, deadline: "tomorrow" }))).toBe(
+      false
+    );
+    expect(isValidBoard(withCard({ ...base, deadline: 20261001 }))).toBe(false);
+  });
 });

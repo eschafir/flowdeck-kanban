@@ -15,6 +15,14 @@
   --panel-muted: rgba(255, 255, 255, 0.75);
   --overlay: rgba(3, 33, 71, 0.35);
   --danger-soft: #fef2f2;
+  --deadline-week: #ecad0a;
+  --deadline-week-bg: rgba(236, 173, 10, 0.1);
+  --deadline-soon: #f97316;
+  --deadline-soon-bg: rgba(249, 115, 22, 0.13);
+  --deadline-today: #ef4444;
+  --deadline-today-bg: rgba(239, 68, 68, 0.14);
+  --deadline-overdue: #b91c1c;
+  --deadline-overdue-bg: rgba(185, 28, 28, 0.2);
   --page-gradient:
     radial-gradient(ellipse 80% 50% at 10% -10%, rgba(32, 157, 215, 0.18), transparent 55%),
     radial-gradient(ellipse 70% 45% at 90% 0%, rgba(236, 173, 10, 0.16), transparent 50%),
@@ -34,6 +42,14 @@ html.dark {
   --panel-muted: rgba(26, 36, 54, 0.9);
   --overlay: rgba(0, 0, 0, 0.55);
   --danger-soft: rgba(127, 29, 29, 0.35);
+  --deadline-week: #ecad0a;
+  --deadline-week-bg: rgba(236, 173, 10, 0.14);
+  --deadline-soon: #fb923c;
+  --deadline-soon-bg: rgba(251, 146, 60, 0.18);
+  --deadline-today: #f87171;
+  --deadline-today-bg: rgba(248, 113, 113, 0.2);
+  --deadline-overdue: #ef4444;
+  --deadline-overdue-bg: rgba(239, 68, 68, 0.32);
   --page-gradient:
     radial-gradient(ellipse 80% 50% at 10% -10%, rgba(32, 157, 215, 0.16), transparent 55%),
     radial-gradient(ellipse 70% 45% at 90% 0%, rgba(236, 173, 10, 0.1), transparent 50%),
@@ -103,4 +119,163 @@ body {
 
 .prose-editor u {
   text-decoration: underline;
+}
+
+.prose-editor s {
+  text-decoration: line-through;
+}
+
+.prose-editor h1,
+.prose-editor h2,
+.prose-editor h3 {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 0.5em;
+}
+
+.prose-editor h1 {
+  font-size: 1.5rem;
+}
+
+.prose-editor h2 {
+  font-size: 1.25rem;
+}
+
+.prose-editor h3 {
+  font-size: 1.0625rem;
+}
+
+.prose-editor blockquote {
+  margin: 0 0 0.75em;
+  padding-left: 0.875rem;
+  border-left: 3px solid var(--accent-yellow);
+  color: var(--gray-text);
+}
+
+.prose-editor code {
+  border-radius: 0.25rem;
+  background: var(--column-bg);
+  padding: 0.1em 0.3em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+}
+
+.prose-editor pre {
+  overflow-x: auto;
+  margin: 0 0 0.75em;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--column-bg);
+  padding: 0.625rem 0.75rem;
+}
+
+.prose-editor pre code {
+  background: none;
+  padding: 0;
+}
+
+.prose-editor hr {
+  margin: 1em 0;
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.prose-editor a {
+  color: var(--blue-primary);
+  text-decoration: underline;
+  cursor: text;
+}
+
+.prose-editor mark {
+  border-radius: 0.15rem;
+  color: inherit;
+}
+
+.prose-editor img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.5em 0;
+  border-radius: 0.5rem;
+}
+
+.prose-editor img.ProseMirror-selectednode {
+  outline: 2px solid var(--blue-primary);
+}
+
+/* Deadline urgency: card accent + tint, and the date badge. */
+.deadline-card[data-urgency] {
+  border-left-width: 4px;
+}
+
+.deadline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--gray-text);
+  background: var(--column-bg);
+  border: 1px solid var(--border-subtle);
+}
+
+.deadline-card[data-urgency="later"] {
+  border-left-color: var(--border-subtle);
+}
+
+.deadline-card[data-urgency="week"] {
+  border-left-color: var(--deadline-week);
+  background-image: linear-gradient(var(--deadline-week-bg), var(--deadline-week-bg));
+}
+
+.deadline-badge[data-urgency="week"] {
+  color: var(--dark-navy);
+  background: var(--deadline-week-bg);
+  border-color: var(--deadline-week);
+}
+
+.deadline-card[data-urgency="soon"] {
+  border-left-color: var(--deadline-soon);
+  background-image: linear-gradient(var(--deadline-soon-bg), var(--deadline-soon-bg));
+}
+
+.deadline-badge[data-urgency="soon"] {
+  color: var(--dark-navy);
+  background: var(--deadline-soon-bg);
+  border-color: var(--deadline-soon);
+}
+
+.deadline-card[data-urgency="today"] {
+  border-left-color: var(--deadline-today);
+  background-image: linear-gradient(var(--deadline-today-bg), var(--deadline-today-bg));
+}
+
+.deadline-badge[data-urgency="today"] {
+  color: var(--dark-navy);
+  background: var(--deadline-today-bg);
+  border-color: var(--deadline-today);
+}
+
+.deadline-card[data-urgency="overdue"] {
+  border-left-color: var(--deadline-overdue);
+  background-image: linear-gradient(var(--deadline-overdue-bg), var(--deadline-overdue-bg));
+}
+
+.deadline-badge[data-urgency="overdue"] {
+  color: var(--dark-navy);
+  background: var(--deadline-overdue-bg);
+  border-color: var(--deadline-overdue);
+}
+
+.deadline-card[data-urgency="overdue"] {
+  box-shadow: 0 0 0 1px var(--deadline-overdue);
+}
+
+.deadline-badge[data-urgency="overdue"] {
+  background: var(--deadline-overdue);
+  color: #ffffff;
 }

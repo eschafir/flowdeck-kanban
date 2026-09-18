@@ -90,10 +90,21 @@ export function deleteCard(board: Board, cardId: string): Board {
 export function updateCard(
   board: Board,
   cardId: string,
-  updates: { title: string; details: string }
+  updates: { title: string; details: string; deadline?: string | null }
 ): Board {
   const title = updates.title.trim();
   const details = updates.details;
+
+  function applyDeadline(card: Card): Card {
+    if (updates.deadline === undefined) return card;
+    const next = { ...card };
+    if (updates.deadline) {
+      next.deadline = updates.deadline;
+    } else {
+      delete next.deadline;
+    }
+    return next;
+  }
 
   return {
     ...board,
@@ -101,7 +112,7 @@ export function updateCard(
       ...column,
       cards: column.cards.map((card) =>
         card.id === cardId
-          ? { ...card, title: title || card.title, details }
+          ? applyDeadline({ ...card, title: title || card.title, details })
           : card
       ),
     })),

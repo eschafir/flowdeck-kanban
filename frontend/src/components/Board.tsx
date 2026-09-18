@@ -38,6 +38,8 @@ import {
   updateCard,
 } from "@/lib/boardActions";
 import { htmlToPlainText } from "@/lib/plainText";
+import { getDeadlineStatus } from "@/lib/deadline";
+import { useToday } from "@/lib/useToday";
 import { loadWorkspace, saveWorkspace } from "@/lib/storage";
 import {
   createBoard,
@@ -139,6 +141,7 @@ const columnCollision: CollisionDetection = (args) => {
 
 export function Board() {
   const [workspace, setWorkspace] = useState<Workspace>(initialWorkspace);
+  const today = useToday();
   const board = getActiveBoard(workspace);
   const boardRef = useRef(board);
   boardRef.current = board;
@@ -148,6 +151,7 @@ export function Board() {
   const [creatingBoard, setCreatingBoard] = useState(false);
   const [editingBoard, setEditingBoard] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState(false);
   const importInputRef = useRef<HTMLInputElement>(null);
   const [ready, setReady] = useState(false);
   const hydrated = useRef(false);
@@ -173,7 +177,10 @@ export function Board() {
 
   useEffect(() => {
     if (!ready || !hydrated.current) return;
-    void saveWorkspace(workspace);
+    saveWorkspace(workspace).then(
+      () => setSaveError(false),
+      () => setSaveError(true)
+    );
   }, [workspace, ready]);
 
   const sensors = useSensors(
@@ -221,7 +228,11 @@ export function Board() {
     setSelectedCardId(cardId);
   }
 
-  function handleSaveCard(updates: { title: string; details: string }) {
+  function handleSaveCard(updates: {
+    title: string;
+    details: string;
+    deadline: string | null;
+  }) {
     if (!selectedCardId) return;
     patchActiveBoard((current) =>
       updateCard(current, selectedCardId, updates)
@@ -426,6 +437,7 @@ export function Board() {
     <Column
       key={column.id}
       column={column}
+      today={today}
       canDelete={board.columns.length > 1}
       onRename={handleRename}
       onDelete={handleDeleteColumn}
@@ -507,6 +519,27 @@ export function Board() {
           </div>
         </div>
 
+        {saveError ? (
+          <p
+            role="alert"
+            data-testid="save-error"
+            className="mt-3 flex items-start gap-3 rounded-md border border-red-300 bg-[var(--danger-soft)] px-3 py-2 text-sm text-red-600"
+          >
+            <span className="flex-1">
+              Couldn&apos;t save your changes — storage is full. Remove some
+              images or use the desktop app.
+            </span>
+            <button
+              type="button"
+              onClick={() => setSaveError(false)}
+              aria-label="Dismiss"
+              className="text-red-600 hover:opacity-70"
+            >
+              ×
+            </button>
+          </p>
+        ) : null}
+
         {importError ? (
           <p
             data-testid="import-board-error"
@@ -559,7 +592,14 @@ export function Board() {
                 </p>
               </div>
             ) : activeCard ? (
-              <div className="w-[min(18rem,100%)] rounded-xl border border-[var(--blue-primary)] bg-[var(--surface-strong)] p-3.5 shadow-xl">
+              <div
+                className="deadline-card w-[min(18rem,100%)] rounded-xl border border-[var(--blue-primary)] bg-[var(--surface-strong)] p-3.5 shadow-xl"
+                data-urgency={
+                  activeCard.deadline
+                    ? getDeadlineStatus(activeCard.deadline, today).level
+                    : undefined
+                }
+              >
                 <h3 className="font-[family-name:var(--font-display)] text-[0.95rem] font-semibold text-[var(--dark-navy)]">
                   {activeCard.title}
                 </h3>

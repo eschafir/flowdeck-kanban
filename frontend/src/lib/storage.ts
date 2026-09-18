@@ -5,13 +5,18 @@ export const WORKSPACE_STORAGE_KEY = "flowdeck.workspace";
 /** Legacy single-board key from earlier versions */
 export const LEGACY_BOARD_STORAGE_KEY = "kanban.board";
 
+export const DEADLINE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
 function isCard(value: unknown): value is Card {
   if (!value || typeof value !== "object") return false;
   const card = value as Record<string, unknown>;
   return (
     typeof card.id === "string" &&
     typeof card.title === "string" &&
-    typeof card.details === "string"
+    typeof card.details === "string" &&
+    (card.deadline === undefined ||
+      (typeof card.deadline === "string" &&
+        DEADLINE_PATTERN.test(card.deadline)))
   );
 }
 

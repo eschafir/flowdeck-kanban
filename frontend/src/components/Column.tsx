@@ -13,6 +13,7 @@ import type { Column as ColumnType } from "@/lib/types";
 
 type ColumnProps = {
   column: ColumnType;
+  today: string;
   canDelete: boolean;
   onRename: (columnId: string, name: string) => void;
   onDelete: (columnId: string) => void;
@@ -23,6 +24,7 @@ type ColumnProps = {
 
 export function Column({
   column,
+  today,
   canDelete,
   onRename,
   onDelete,
@@ -183,6 +185,7 @@ export function Column({
             <Card
               key={card.id}
               card={card}
+              today={today}
               onOpen={onOpenCard}
               onDelete={onDeleteCard}
             />

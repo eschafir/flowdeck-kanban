@@ -2,16 +2,19 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { getDeadlineStatus } from "@/lib/deadline";
 import { htmlToPlainText } from "@/lib/plainText";
 import type { Card as CardType } from "@/lib/types";
 
 type CardProps = {
   card: CardType;
+  /** Today's local `YYYY-MM-DD`, used to compute deadline urgency. */
+  today: string;
   onOpen: (cardId: string) => void;
   onDelete: (cardId: string) => void;
 };
 
-export function Card({ card, onOpen, onDelete }: CardProps) {
+export function Card({ card, today, onOpen, onDelete }: CardProps) {
   const {
     attributes,
     listeners,
@@ -27,13 +30,17 @@ export function Card({ card, onOpen, onDelete }: CardProps) {
   };
 
   const preview = htmlToPlainText(card.details);
+  const deadline = card.deadline
+    ? getDeadlineStatus(card.deadline, today)
+    : null;
 
   return (
     <article
       ref={setNodeRef}
       style={style}
       data-testid={card.id}
-      className={`group relative cursor-grab rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-strong)] p-3.5 shadow-[var(--shadow-soft)] transition-shadow active:cursor-grabbing ${
+      data-urgency={deadline?.level}
+      className={`deadline-card group relative cursor-grab rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-strong)] p-3.5 shadow-[var(--shadow-soft)] transition-shadow active:cursor-grabbing ${
         isDragging
           ? "z-20 opacity-50 shadow-xl ring-2 ring-[var(--blue-primary)]"
           : "hover:shadow-md"
@@ -55,6 +62,15 @@ export function Card({ card, onOpen, onDelete }: CardProps) {
             <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-[var(--gray-text)]">
               {preview}
             </p>
+          ) : null}
+          {deadline ? (
+            <span
+              className="deadline-badge mt-2"
+              data-testid={`deadline-${card.id}`}
+              data-urgency={deadline.level}
+            >
+              {deadline.label}
+            </span>
           ) : null}
         </button>
         <button

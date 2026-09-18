@@ -157,6 +157,29 @@ describe("updateCard", () => {
     expect(next.columns[0].cards[0].title).toBe("One");
     expect(next.columns[0].cards[0].details).toBe("kept");
   });
+
+  it("sets, keeps, and clears the deadline", () => {
+    const withDeadline = updateCard(sampleBoard, "c1", {
+      title: "One",
+      details: "First",
+      deadline: "2026-10-01",
+    });
+    expect(withDeadline.columns[0].cards[0].deadline).toBe("2026-10-01");
+
+    const untouched = updateCard(withDeadline, "c1", {
+      title: "One",
+      details: "Edited",
+    });
+    expect(untouched.columns[0].cards[0].deadline).toBe("2026-10-01");
+
+    const cleared = updateCard(withDeadline, "c1", {
+      title: "One",
+      details: "Edited",
+      deadline: null,
+    });
+    expect(cleared.columns[0].cards[0]).not.toHaveProperty("deadline");
+    expect(withDeadline.columns[0].cards[0].deadline).toBe("2026-10-01");
+  });
 });
 
 describe("findCardLocation", () => {

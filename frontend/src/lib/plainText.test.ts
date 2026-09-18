@@ -15,4 +15,11 @@ describe("htmlToPlainText", () => {
   it("handles empty input", () => {
     expect(htmlToPlainText("")).toBe("");
   });
+
+  it("drops images, links and styling but keeps the words", () => {
+    const html =
+      '<h2>Plan</h2><p>See <a href="https://example.com">the doc</a> <span style="font-size: 18px">now</span></p>' +
+      '<img src="data:image/png;base64,AAAA"><ul><li>One</li><li>Two</li></ul>';
+    expect(htmlToPlainText(html)).toBe("Plan See the doc now One Two");
+  });
 });

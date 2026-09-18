@@ -44,6 +44,24 @@ describe("boardTransfer", () => {
     expect(next.boards[1].id).not.toBe(initialBoard.id);
   });
 
+  it("keeps card deadlines through export and import", () => {
+    const board = {
+      ...initialBoard,
+      columns: [
+        {
+          id: "c",
+          name: "C",
+          cards: [{ id: "a", title: "A", details: "", deadline: "2026-10-01" }],
+        },
+      ],
+    };
+    const parsed = parseBoardExport(serializeBoardExport(board));
+    expect(parsed?.columns[0].cards[0].deadline).toBe("2026-10-01");
+    expect(remintBoardIds(board).columns[0].cards[0].deadline).toBe(
+      "2026-10-01"
+    );
+  });
+
   it("builds a safe export filename", () => {
     expect(boardExportFilename("Product Launch")).toBe(
       "product-launch.flowdeck.json"

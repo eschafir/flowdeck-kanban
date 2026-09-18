@@ -2,6 +2,8 @@ export type Card = {
   id: string;
   title: string;
   details: string;
+  /** Local calendar date, `YYYY-MM-DD`. */
+  deadline?: string;
 };
 
 export type Column = {

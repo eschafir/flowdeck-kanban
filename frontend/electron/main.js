@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
 const http = require("node:http");
@@ -136,6 +136,24 @@ async function createWindow() {
       nodeIntegration: false,
       sandbox: false,
     },
+  });
+
+  // Links in card descriptions open in the system browser; the app window
+  // itself never navigates away.
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^(https?:|mailto:)/i.test(url)) {
+      void shell.openExternal(url);
+    }
+    return { action: "deny" };
+  });
+  win.webContents.on("will-navigate", (event, url) => {
+    const current = win.webContents.getURL();
+    if (new URL(url).origin !== new URL(current).origin) {
+      event.preventDefault();
+      if (/^(https?:|mailto:)/i.test(url)) {
+        void shell.openExternal(url);
+      }
+    }
   });
 
   if (isDev) {

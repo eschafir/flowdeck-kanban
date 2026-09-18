@@ -262,6 +262,136 @@ test.describe("Flowdeck board", () => {
     ).toBeVisible();
   });
 
+  test("formats a description with headings, sizes, links, and images", async ({
+    page,
+  }) => {
+    const errors: string[] = [];
+    page.on("console", (message) => {
+      if (message.text().includes("Duplicate extension")) {
+        errors.push(message.text());
+      }
+    });
+
+    await page.getByTestId("open-card-1").click();
+    const details = page.getByTestId("card-editor-details");
+    await details.click();
+    await details.evaluate((el) => {
+      el.focus();
+      document.execCommand("selectAll", false);
+      document.execCommand("insertText", false, "Launch checklist");
+    });
+
+    await page.getByTestId("toolbar-block-style").selectOption("2");
+    await expect(details.locator("h2")).toHaveText("Launch checklist");
+    await expect(details).toBeFocused();
+
+    await page.keyboard.press("End");
+    await page.keyboard.press("Enter");
+    await page.getByTestId("toolbar-bullets").click();
+    await page.keyboard.type("Write docs");
+    await expect(details.locator("ul li")).toHaveText("Write docs");
+    await expect(page.getByTestId("toolbar-bullets")).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+
+    await page.getByTestId("toolbar-font-size").selectOption("24px");
+    await expect(details).toBeFocused();
+    await page.keyboard.type(" now");
+    await expect(details.locator("span[style*='font-size']")).toHaveText(" now");
+
+    // Link on selected text
+    await details.locator("li").click();
+    await page.keyboard.press("Home");
+    await page.keyboard.press("Shift+End");
+    await page.getByTestId("toolbar-link").click();
+    await page.getByTestId("card-editor-url-input").fill("example.com/docs");
+    await page.getByTestId("card-editor-url-apply").click();
+    await expect(details.locator("a")).toHaveAttribute(
+      "href",
+      "https://example.com/docs"
+    );
+
+    // Unsafe links are rejected
+    await page.getByTestId("toolbar-link").click();
+    await page.getByTestId("card-editor-url-input").fill("javascript:alert(1)");
+    await page.getByTestId("card-editor-url-apply").click();
+    await expect(
+      page.getByTestId("toolbar-url-panel").getByRole("alert")
+    ).toContainText("valid");
+    await page
+      .getByTestId("toolbar-url-panel")
+      .getByRole("button", { name: "Cancel" })
+      .click();
+    await expect(details).toBeFocused();
+
+    // Image upload (collapse the selection so the image doesn't replace the link text)
+    await page.keyboard.press("End");
+    const png = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+      "base64"
+    );
+    await page.getByTestId("card-editor-image-input").setInputFiles({
+      name: "pixel.png",
+      mimeType: "image/png",
+      buffer: png,
+    });
+    await expect(details.locator("img")).toHaveCount(1);
+    await expect(details.locator("img")).toHaveAttribute("src", /^data:image\//);
+
+    await page.getByTestId("card-editor-save").click();
+    await page.reload();
+
+    await page.getByTestId("open-card-1").click();
+    const reopened = page.getByTestId("card-editor-details");
+    await expect(reopened.locator("h2")).toHaveText("Launch checklist");
+    await expect(reopened.locator("ul li")).toContainText("Write docs");
+    await expect(reopened.locator("a")).toHaveAttribute(
+      "href",
+      "https://example.com/docs"
+    );
+    await expect(reopened.locator("img")).toHaveCount(1);
+    expect(errors).toEqual([]);
+  });
+
+  test("sets, edits, and clears a card deadline", async ({ page }) => {
+    function dateInDays(days: number): string {
+      const date = new Date();
+      date.setDate(date.getDate() + days);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
+
+    const badge = page.getByTestId("deadline-card-1");
+    await expect(badge).toHaveCount(0);
+
+    await page.getByTestId("open-card-1").click();
+    await page.getByTestId("card-editor-deadline").fill(dateInDays(5));
+    await page.getByTestId("card-editor-save").click();
+    await expect(badge).toHaveAttribute("data-urgency", "week");
+    await expect(page.getByTestId("card-1")).toHaveAttribute(
+      "data-urgency",
+      "week"
+    );
+
+    await page.reload();
+    await expect(badge).toHaveAttribute("data-urgency", "week");
+
+    await page.getByTestId("open-card-1").click();
+    await expect(page.getByTestId("card-editor-deadline")).toHaveValue(
+      dateInDays(5)
+    );
+    await page.getByTestId("card-editor-deadline").fill(dateInDays(-2));
+    await page.getByTestId("card-editor-save").click();
+    await expect(badge).toHaveAttribute("data-urgency", "overdue");
+    await expect(badge).toHaveText("Overdue 2d");
+
+    await page.getByTestId("open-card-1").click();
+    await page.getByTestId("card-editor-deadline-clear").click();
+    await page.getByTestId("card-editor-save").click();
+    await expect(badge).toHaveCount(0);
+  });
+
   test("creates a new board and switches between boards", async ({ page }) => {
     await page.getByTestId("board-menu").click();
     await page.getByTestId("new-board").click();
